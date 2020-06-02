@@ -1,5 +1,6 @@
 package com.quiz_moviles;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,45 +9,51 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+import android.database.sqlite.*;
+
 
 public class MainActivity extends AppCompatActivity {
+    public static SQLiteDatabase db;
 
+    @SuppressLint("SdCardPath")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-    }
+        // Creamos la base de datos
+        Toast.makeText(getApplicationContext(), "Creamos la base de datos", Toast.LENGTH_LONG).show();
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+        try {
+            db = this.openOrCreateDatabase(
+                    "matriculadb",
+                    MODE_PRIVATE,
+                    null);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+            db.beginTransaction();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+            db.execSQL("CREATE TABLE IF NOT EXISTS ESTUDIANTE(" +
+                    "cedula text PRIMARY KEY, " +
+                    "nombre text," +
+                    "apellidos text," +
+                    "edad integer );");
+
+            db.execSQL("CREATE TABLE IF NOT EXISTS CURSO(" +
+                    "codigo text PRIMARY KEY, " +
+                    "descripcion text," +
+                    "creditos integer );");
+
+            db.execSQL("CREATE TABLE IF NOT EXISTS ESTUDIANTExCURSO(" +
+                    "id integer PRIMARY KEY autoincrement," +
+                    "cedula text," +
+                    "codigo text );");
+
+            db.setTransactionSuccessful(); //commit your changes
+            db.endTransaction();
+        } catch (SQLiteException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
-        return super.onOptionsItemSelected(item);
     }
 }
