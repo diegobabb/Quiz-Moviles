@@ -22,9 +22,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Creamos la base de datos
-        Toast.makeText(getApplicationContext(), "Creamos la base de datos", Toast.LENGTH_LONG).show();
-
         try {
             db = this.openOrCreateDatabase(
                     "matriculadb",
@@ -48,6 +45,13 @@ public class MainActivity extends AppCompatActivity {
                     "id integer PRIMARY KEY autoincrement," +
                     "cedula text," +
                     "codigo text );");
+
+            db.execSQL("insert or ignore  into CURSO(codigo, descripcion, creditos) values ('FIN', 'Fundamentos de informatica', 3 );");
+            db.execSQL("insert or ignore  into CURSO(codigo, descripcion, creditos) values ('PRO1', 'Programacion 1', 3 );");
+            db.execSQL("insert or ignore  into CURSO(codigo, descripcion, creditos) values ('PRO2', 'Programacion 2', 3 );");
+            db.execSQL("insert or ignore  into CURSO(codigo, descripcion, creditos) values ('PRO3', 'Programacion 3', 4 );");
+            db.execSQL("insert or ignore  into CURSO(codigo, descripcion, creditos) values ('EST', 'Estructuras de datos', 4 );");
+
 
             db.setTransactionSuccessful(); //commit your changes
             db.endTransaction();

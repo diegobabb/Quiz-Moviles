@@ -3,24 +3,19 @@ package com.quiz_moviles;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.*;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.DragAndDropPermissions;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.widget.ArrayAdapter;
-import android.widget.CheckedTextView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -30,22 +25,10 @@ import com.quiz_moviles.Adapters.MyAdapterChecked;
 import com.quiz_moviles.Estructuras.Curso;
 import com.quiz_moviles.Estructuras.Datos;
 import com.quiz_moviles.Estructuras.Estudiante;
-import com.quiz_moviles.Estructuras.SERVICIOS;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class SecondFragment extends Fragment {
 
@@ -79,8 +62,8 @@ public class SecondFragment extends Fragment {
         nombre = view.findViewById(R.id.nombre);
         apellidos = view.findViewById(R.id.apellidos);
         edad = view.findViewById(R.id.edad);
-
         Objects.requireNonNull(getActivity()).findViewById(R.id.fab).setVisibility(View.GONE);
+        listarCursos();
         adapter = new MyAdapterChecked(Datos.getInstance().getCursos());
         RecyclerView recyclerView_cursos = view.findViewById(R.id.recyclerView_cursos);
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
@@ -90,15 +73,12 @@ public class SecondFragment extends Fragment {
 
         progressBar = view.findViewById(R.id.progressBar);
 
+        // Lista TODOS los cursos
+
+
         view.findViewById(R.id.button_second).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for (CheckedTextView checkedTextView : adapter.getCheckedTextViews()) {
-                    if (!checkedTextView.isChecked()) {
-                        mostrarMensaje("ERROR", "Al menos debes de seleccionar un curso");
-                        return;
-                    }
-                }
                 Estudiante estudiante = new Estudiante(
                         Objects.requireNonNull(cedula.getText()).toString(),
                         Objects.requireNonNull(nombre.getText()).toString(),
@@ -106,17 +86,19 @@ public class SecondFragment extends Fragment {
                         Integer.parseInt(Objects.requireNonNull(edad.getText()).toString())
                 );
                 if (editar) {
-                    Datos.getInstance().getEstudiantes().remove(estudiante);
+                    modificarEstudiante(estudiante);
+                    asignarEstudianteCursos(estudiante, adapter.getSeleccionados());
                     FirstFragment newFragment = new FirstFragment();
                     FragmentTransaction transaction = Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.nav_host_fragment, newFragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
                 } else {
+                    insertarEstudiante(estudiante);
+                    asignarEstudianteCursos(estudiante, adapter.getSeleccionados());
                     NavHostFragment.findNavController(SecondFragment.this)
                             .navigate(R.id.action_SecondFragment_to_FirstFragment);
                 }
-                insertarEstudiante(estudiante);
             }
         });
 
@@ -134,15 +116,7 @@ public class SecondFragment extends Fragment {
                 nombre.setText(estudiante.getNombre());
                 apellidos.setText(estudiante.getApellidos());
                 edad.setText(estudiante.getEdad().toString());
-                // Lista de cursos por estudiante
-                for (int i = 0; i < adapter.getItemCount(); i++) {
-                    for (String codigo : adapter.getSeleccionados()) {
-                        if (adapter.getmDataset().get(i).getCodigo().equals(codigo)) {
-                            adapter.getCheckedTextViews().get(i).setChecked(true);
-                            break;
-                        }
-                    }
-                }
+                getCursosEstudiante(estudiante);
                 cedula.setEnabled(false);
             }
         } else
@@ -159,14 +133,97 @@ public class SecondFragment extends Fragment {
 
         try {
             MainActivity.db.execSQL(sql);
+            Datos.getInstance().getEstudiantes().add(0, estudiante);
 
         } catch (SQLException sqle) {
             Toast.makeText(getActivity(), sqle.getMessage(), Toast.LENGTH_LONG).show();
-        } finally {
-            Datos.getInstance().getEstudiantes().add(0, estudiante);
         }
-
     }
 
+
+    private void modificarEstudiante(Estudiante estudiante) {
+        String pre_sql = "UPDATE ESTUDIANTE SET nombre = '%s', apellidos = '%s', edad = %d WHERE cedula = '%s'";
+
+
+        String sql = String.format(pre_sql, estudiante.getNombre(), estudiante.getApellidos(), estudiante.getEdad(), estudiante.getCedula());
+
+        try {
+            MainActivity.db.execSQL(sql);
+            Datos.getInstance().getEstudiantes().remove(estudiante);
+            Datos.getInstance().getEstudiantes().add(0, estudiante);
+
+        } catch (SQLException sqle) {
+            Toast.makeText(getActivity(), sqle.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void listarCursos() {
+
+        Datos.getInstance().getCursos().clear();
+
+        String mySQL = "SELECT codigo, descripcion, creditos FROM CURSO";
+
+        Cursor cursor = MainActivity.db.rawQuery(mySQL, null);
+
+        int idCodigo = cursor.getColumnIndex("codigo");
+        int idDescrip = cursor.getColumnIndex("descripcion");
+        int idCreditos = cursor.getColumnIndex("creditos");
+
+        while (cursor.moveToNext()) {
+            Datos.getInstance().getCursos().add(new Curso(
+                    cursor.getString(idCodigo),
+                    cursor.getString(idDescrip),
+                    cursor.getInt(idCreditos)
+            ));
+        }
+    }
+
+    private void asignarEstudianteCursos(Estudiante estudiante, List<String> cursos) {
+
+        String prepare_eliminar = "DELETE FROM ESTUDIANTExCURSO WHERE cedula = '%s'";
+        String sql_eliminar = String.format(prepare_eliminar, estudiante.getCedula());
+
+        String prepare_insertar = "INSERT INTO ESTUDIANTExCURSO (cedula, codigo) values ('%s', '%s'); ";
+        String sql_insertar = "";
+
+        try {
+            MainActivity.db.execSQL(sql_eliminar);
+
+            for (String codigo : cursos) {
+                sql_insertar = String.format(prepare_insertar, estudiante.getCedula(), codigo);
+                MainActivity.db.execSQL(sql_insertar);
+            }
+
+        } catch (SQLException sqle) {
+            Log.d("ERROR ELIMINANDO", sqle.getMessage());
+        }
+    }
+
+
+    // Solo devuelve los indices de los cursos checkeados
+    private void getCursosEstudiante(Estudiante estudiante) {
+
+        String PREmySQL =
+                "SELECT  ESTUDIANTExCURSO.codigo AS cod " +
+                        "FROM ESTUDIANTExCURSO " +
+                        "INNER JOIN ESTUDIANTE ON ESTUDIANTExCURSO.cedula = ESTUDIANTE.cedula " +
+                        "INNER JOIN CURSO ON ESTUDIANTExCURSO.codigo = CURSO.codigo " +
+                        "WHERE ESTUDIANTExCURSO.cedula = '%s'";
+
+        String mySQL = String.format(PREmySQL, estudiante.getCedula());
+
+        Cursor cursor = MainActivity.db.rawQuery(mySQL, null);
+
+        int cod_indice = cursor.getColumnIndex("cod");
+        ArrayList<String> seleccionados = new ArrayList<>();
+
+        while (cursor.moveToNext()) {
+            seleccionados.add(cursor.getString(cod_indice));
+        }
+
+        adapter.setSeleccionados(seleccionados);
+
+        adapter.notifyDataSetChanged();
+    }
 
 }

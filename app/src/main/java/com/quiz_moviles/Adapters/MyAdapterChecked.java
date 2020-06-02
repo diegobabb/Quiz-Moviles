@@ -72,6 +72,13 @@ public class MyAdapterChecked extends RecyclerView.Adapter<MyAdapterChecked.View
                 seleccionados.remove(mDataset.get(i).getCodigo());
             Log.d("PRUEBAS", seleccionados.toString());
         });
+
+        // Revisa los seleccionados y sale checkeado en caso que se encuentre
+        for (String codigo : seleccionados) {
+            if (codigo.trim().equals(mDataset.get(i).getCodigo().trim())) {
+                viewHolder.checkedTextView.setChecked(true);
+            }
+        }
         checkedTextViews.add(viewHolder.checkedTextView);
     }
 

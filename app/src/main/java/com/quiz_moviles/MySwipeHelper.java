@@ -1,13 +1,16 @@
 package com.quiz_moviles;
 
 import android.annotation.SuppressLint;
+import android.database.SQLException;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.quiz_moviles.Adapters.MyAdapter;
 import com.quiz_moviles.Estructuras.Datos;
@@ -40,17 +43,15 @@ public class MySwipeHelper extends ItemTouchHelper.SimpleCallback {
         switch (direction) {
             case ItemTouchHelper.LEFT:
                 final Estudiante aux = adapter.getmDataset().remove(position);
-                Datos.getInstance().getEstudiantes().remove(aux);
-                adapter.notifyItemRemoved(position);
-                Snackbar.make(recyclerView, aux.getNombre(), Snackbar.LENGTH_LONG)
+                eliminarEstudiante(aux, position);
+               /* Snackbar.make(recyclerView, aux.getNombre(), Snackbar.LENGTH_LONG)
                         .setAction("Deshacer", new View.OnClickListener() {
                             private boolean flag = true;
 
                             @Override
                             public void onClick(View view) {
                                 if (flag) {
-                                    adapter.getmDataset().add(position, aux);
-                                    Datos.getInstance().getEstudiantes().add(position, aux);
+                                    restaurar(aux);
                                     adapter.notifyItemInserted(position);
                                 }
                                 flag = false;
@@ -68,7 +69,7 @@ public class MySwipeHelper extends ItemTouchHelper.SimpleCallback {
                     public void onShown(Snackbar snackbar) {
                         snackbar.show();
                     }
-                }).show();
+                }).show();*/
                 break;
             case ItemTouchHelper.RIGHT:
                 fragment.moveToSecondFragment(adapter.getmDataset().get(position), position);
@@ -88,4 +89,41 @@ public class MySwipeHelper extends ItemTouchHelper.SimpleCallback {
                 .addSwipeRightActionIcon(R.drawable.ic_edit_24dp).create().decorate();
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
+
+
+    private void eliminarEstudiante(Estudiante estudiante, int position) {
+        String pre_sql = "DELETE FROM ESTUDIANTE WHERE cedula = '%s'";
+        String pre_sql_matriculados = "DELETE FROM ESTUDIANTExCURSO WHERE cedula = '%s'";
+
+        String sql = String.format(pre_sql, estudiante.getCedula());
+        String sql_eliminar_matriculados = String.format(pre_sql, estudiante.getCedula());
+
+        try {
+            MainActivity.db.execSQL(sql);
+            MainActivity.db.execSQL(sql_eliminar_matriculados);
+            Datos.getInstance().getEstudiantes().remove(estudiante);
+            adapter.notifyItemRemoved(position);
+        } catch (SQLException sqle) {
+            Log.d("ERROR ELIMINANDO", sqle.getMessage());
+        }
+    }
+
+    /*
+    private void restaurar(Estudiante estudiante) {
+
+        String pre_sql = "insert into ESTUDIANTE(cedula, nombre, apellidos, edad)"
+                + " values('%s', '%s', '%s', %d);";
+
+        String sql = String.format(pre_sql, estudiante.getCedula(), estudiante.getNombre(), estudiante.getApellidos(), estudiante.getEdad());
+
+        try {
+            MainActivity.db.execSQL(sql);
+            Datos.getInstance().getEstudiantes().add(0, estudiante);
+
+        } catch (SQLException sqle) {
+            Log.d("ERROR RESTAURADO", sqle.getMessage());
+        }
+    }
+
+     */
 }
