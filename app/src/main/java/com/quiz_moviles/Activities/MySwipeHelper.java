@@ -1,20 +1,18 @@
-package com.quiz_moviles;
+package com.quiz_moviles.Activities;
 
 import android.annotation.SuppressLint;
 import android.database.SQLException;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.quiz_moviles.Adapters.MyAdapter;
-import com.quiz_moviles.Estructuras.Datos;
-import com.quiz_moviles.Estructuras.Estudiante;
+import com.quiz_moviles.LogicaNegocio.Datos;
+import com.quiz_moviles.LogicaNegocio.Estudiante;
+import com.quiz_moviles.R;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
@@ -44,32 +42,6 @@ public class MySwipeHelper extends ItemTouchHelper.SimpleCallback {
             case ItemTouchHelper.LEFT:
                 final Estudiante aux = adapter.getmDataset().remove(position);
                 eliminarEstudiante(aux, position);
-               /* Snackbar.make(recyclerView, aux.getNombre(), Snackbar.LENGTH_LONG)
-                        .setAction("Deshacer", new View.OnClickListener() {
-                            private boolean flag = true;
-
-                            @Override
-                            public void onClick(View view) {
-                                if (flag) {
-                                    restaurar(aux);
-                                    adapter.notifyItemInserted(position);
-                                }
-                                flag = false;
-                            }
-                        }).addCallback(new Snackbar.Callback() {
-
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-                        if (event == Snackbar.Callback.DISMISS_EVENT_TIMEOUT) {
-                            fragment.removeEstudiante(position, aux);
-                        }
-                    }
-
-                    @Override
-                    public void onShown(Snackbar snackbar) {
-                        snackbar.show();
-                    }
-                }).show();*/
                 break;
             case ItemTouchHelper.RIGHT:
                 fragment.moveToSecondFragment(adapter.getmDataset().get(position), position);
@@ -108,22 +80,4 @@ public class MySwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
     }
 
-    /*
-    private void restaurar(Estudiante estudiante) {
-
-        String pre_sql = "insert into ESTUDIANTE(cedula, nombre, apellidos, edad)"
-                + " values('%s', '%s', '%s', %d);";
-
-        String sql = String.format(pre_sql, estudiante.getCedula(), estudiante.getNombre(), estudiante.getApellidos(), estudiante.getEdad());
-
-        try {
-            MainActivity.db.execSQL(sql);
-            Datos.getInstance().getEstudiantes().add(0, estudiante);
-
-        } catch (SQLException sqle) {
-            Log.d("ERROR RESTAURADO", sqle.getMessage());
-        }
-    }
-
-     */
 }

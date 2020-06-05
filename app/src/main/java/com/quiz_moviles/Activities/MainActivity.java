@@ -1,4 +1,4 @@
-package com.quiz_moviles;
+package com.quiz_moviles.Activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import android.database.sqlite.*;
+
+import com.quiz_moviles.R;
 
 
 public class MainActivity extends AppCompatActivity {

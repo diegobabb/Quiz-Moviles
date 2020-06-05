@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.quiz_moviles.Estructuras.Estudiante;
+import com.quiz_moviles.LogicaNegocio.Estudiante;
 import com.quiz_moviles.R;
 
 import java.util.ArrayList;

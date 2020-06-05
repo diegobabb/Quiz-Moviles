@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckedTextView;
 
-import com.quiz_moviles.Estructuras.Curso;
+import com.quiz_moviles.LogicaNegocio.Curso;
 import com.quiz_moviles.R;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.quiz_moviles;
+package com.quiz_moviles.Activities;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -22,9 +22,10 @@ import android.widget.Toast;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.quiz_moviles.Adapters.MyAdapterChecked;
-import com.quiz_moviles.Estructuras.Curso;
-import com.quiz_moviles.Estructuras.Datos;
-import com.quiz_moviles.Estructuras.Estudiante;
+import com.quiz_moviles.LogicaNegocio.Curso;
+import com.quiz_moviles.LogicaNegocio.Datos;
+import com.quiz_moviles.LogicaNegocio.Estudiante;
+import com.quiz_moviles.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,44 +1,31 @@
-package com.quiz_moviles;
+package com.quiz_moviles.Activities;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.widget.Toast;
 
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.quiz_moviles.Adapters.MyAdapter;
-import com.quiz_moviles.Estructuras.Datos;
-import com.quiz_moviles.Estructuras.Estudiante;
-import com.quiz_moviles.Estructuras.SERVICIOS;
+import com.quiz_moviles.LogicaNegocio.Datos;
+import com.quiz_moviles.LogicaNegocio.Estudiante;
+import com.quiz_moviles.R;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.sql.SQLException;
 import java.util.Objects;
 
 public class FirstFragment extends Fragment {
 
-    static final String DIRECCION_SERVLET_ESTUDIANTES = "http://10.0.2.2:8084/QuizWebServer/ServletEstudiante/";
     static final String ARG_ESTUDIANTE = "estudiante";
     static final String ARG_POSITION = "position";
     MyAdapter myAdapter;

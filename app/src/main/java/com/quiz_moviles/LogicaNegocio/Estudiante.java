@@ -1,4 +1,4 @@
-package com.quiz_moviles.Estructuras;
+package com.quiz_moviles.LogicaNegocio;
 
 import org.json.JSONException;
 import org.json.JSONObject;
